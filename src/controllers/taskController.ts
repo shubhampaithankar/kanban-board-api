@@ -1,5 +1,7 @@
 import { Request, Response } from 'express'
 import Task, { ITask } from '../models/Task'
+import { RequestWithUser } from './authController'
+import User from '../models/User'
 
 // Create a new task
 export const createTask = async (req: Request, res: Response) => {
@@ -17,18 +19,26 @@ export const createTask = async (req: Request, res: Response) => {
     res.status(201).json({ ack: 1 })
   } catch (error) {
     console.log(error.message)
-    res.status(500).json({ message: 'Task creation failed' })
+    res.status(500).json({ ack: 0, message: 'Task creation failed' })
   }
 }
 
 // Get all tasks
-export const getAllTasks = async (req: Request, res: Response) => {
+export const getAllTasks = async (req: RequestWithUser, res: Response) => {
   try {
+    const { userId } = req.user
     const { id } = req.body
-    const tasks: ITask[] = await Task.find({
-      project: id
-    })
-    res.status(200).json({ack: 1, tasks })
+
+    // verify if project id belongs to current user, only then proceed
+    const user = await User.findById(userId)
+    if (user.projects.includes(id)) { 
+      const tasks: ITask[] = await Task.find({
+        project: id
+      })
+      res.status(200).json({ack: 1, tasks })
+    } else {
+      res.status(404).json({ ack: 0, message: 'Project not found' })
+    }
   } catch (error) {
     res.status(500).json({ ack: 0, message: 'Failed to retrieve tasks' })
   }
@@ -44,7 +54,7 @@ export const updateTask = async (req: Request, res: Response) => {
       { new: true }
     )
     if (!updatedTask) {
-      return res.status(404).json({ ack: 1,message: 'Task not found' })
+      return res.status(404).json({ ack: 0,message: 'Task not found' })
     }
     res.status(200).json({ack: 1 })
   } catch (error) {
@@ -58,9 +68,9 @@ export const deleteTask = async (req: Request, res: Response) => {
     const { id } = req.body
     const deletedTask: ITask | null = await Task.findByIdAndDelete(id)
     if (!deletedTask) {
-      return res.status(404).json({ ack: 1, message: 'Task not found' })
+      return res.status(404).json({ ack: 0, message: 'Task not found' })
     }
-    res.status(200).json(deletedTask)
+    res.status(200).json({ack: 1})
   } catch (error) {
     res.status(500).json({ ack: 0, message: 'Task deletion failed' })
   }

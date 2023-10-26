@@ -3,6 +3,12 @@ import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 import User, { IUser } from '../models/User'
 
+export interface RequestWithUser extends Request {
+  user?: {
+    userId: string
+  }
+}
+
 // Register a new user
 export const register = async (req: Request, res: Response) => {
   try {
@@ -72,11 +78,5 @@ export const verifyToken = (req: RequestWithUser, res: Response, next?: NextFunc
         next()
     } catch (error) {
         return res.status(401).json({ ack: 2, message: 'Invalid token.' })
-    }
-}
-  
-export interface RequestWithUser extends Request {
-    user?: {
-      userId: string
     }
 }

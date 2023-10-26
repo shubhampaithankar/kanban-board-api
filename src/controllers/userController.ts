@@ -10,7 +10,7 @@ export const updateUser = async (req: RequestWithUser, res: Response) => {
       return res.status(404).json({ ack: 0, message: 'User not found' });
     }
 
-    res.status(200).json(updatedUser);
+    res.status(200).json({ ack: 1 });
   } catch (error) {
     res.status(500).json({ ack: 0, message: 'User update failed' });
   }
@@ -30,4 +30,4 @@ export const getUserDetails = async (req: RequestWithUser, res: Response) => {
     } catch (error) {
       res.status(500).json({ ack: 0, message: 'Failed to fetch user details' });
     }
-  }
+}
