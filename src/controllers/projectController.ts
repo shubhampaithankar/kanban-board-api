@@ -34,16 +34,16 @@ export const getAllProjects = async (req: RequestWithUser, res: Response) => {
 // Update a project
 export const updateProject = async (req: Request, res: Response) => {
   try {
-    const projectId: string = req.body.id
+    const { id, data } = req.body
     const updatedProject: IProject | null = await Project.findByIdAndUpdate(
-      projectId,
-      req.body,
+      id,
+      data,
       { new: true }
     )
     if (!updatedProject) {
       return res.status(404).json({ ack: 0, message: 'Project not found' })
     }
-    res.status(200).json({ ack: 1, updatedProject })
+    res.status(200).json({ ack: 1, data: updatedProject })
   } catch (error) {
     res.status(500).json({ ack: 0, message: 'Project update failed' })
   }
@@ -52,9 +52,9 @@ export const updateProject = async (req: Request, res: Response) => {
 // Delete a project
 export const deleteProject = async (req: Request, res: Response) => {
   try {
-    const projectId: string = req.body.id
+    const { id } = req.body
     const deletedProject: IProject | null = await Project.findByIdAndDelete(
-      projectId
+      id
     )
     if (!deletedProject) {
       return res.status(404).json({ ack: 0, message: 'Project not found' })

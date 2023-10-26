@@ -6,7 +6,8 @@ export interface ITask extends Document {
   status: string
   labels: string[]
   priority: string
-  project: mongoose.Types.ObjectId
+  project: mongoose.Types.ObjectId,
+  dueDate: Date
 }
 
 const taskSchema: Schema<ITask> = new Schema({
@@ -34,7 +35,9 @@ const taskSchema: Schema<ITask> = new Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Project',
   },
-  
+  dueDate: {
+    type: Date
+  }
 })
 
 const Task = mongoose.model<ITask>('Task', taskSchema)

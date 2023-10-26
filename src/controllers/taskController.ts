@@ -14,7 +14,7 @@ export const createTask = async (req: Request, res: Response) => {
       project,
     })
     await newTask.save()
-    res.status(201).json({ack: 1,newTask})
+    res.status(201).json({ ack: 1 })
   } catch (error) {
     console.log(error.message)
     res.status(500).json({ message: 'Task creation failed' })
@@ -37,16 +37,16 @@ export const getAllTasks = async (req: Request, res: Response) => {
 // Update a task
 export const updateTask = async (req: Request, res: Response) => {
   try {
-    const taskId: string = req.params.id
+    const { id, data } = req.body
     const updatedTask: ITask | null = await Task.findByIdAndUpdate(
-      taskId,
-      req.body,
+      id,
+      data,
       { new: true }
     )
     if (!updatedTask) {
       return res.status(404).json({ ack: 1,message: 'Task not found' })
     }
-    res.status(200).json(updatedTask)
+    res.status(200).json({ack: 1 })
   } catch (error) {
     res.status(500).json({ ack: 0, message: 'Task update failed' })
   }
@@ -55,8 +55,8 @@ export const updateTask = async (req: Request, res: Response) => {
 // Delete a task
 export const deleteTask = async (req: Request, res: Response) => {
   try {
-    const taskId: string = req.params.id
-    const deletedTask: ITask | null = await Task.findByIdAndDelete(taskId)
+    const { id } = req.body
+    const deletedTask: ITask | null = await Task.findByIdAndDelete(id)
     if (!deletedTask) {
       return res.status(404).json({ ack: 1, message: 'Task not found' })
     }
