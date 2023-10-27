@@ -14,6 +14,6 @@ taskRouter.post('/get', verifyToken, getAllTasks)
 taskRouter.post('/update', verifyToken, updateTask)
 
 // Delete a task (requires authentication)
-taskRouter.delete('/delete', verifyToken, deleteTask)
+taskRouter.post('/delete', verifyToken, deleteTask)
 
 export default taskRouter

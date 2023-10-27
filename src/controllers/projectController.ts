@@ -1,17 +1,21 @@
 import { Request, Response } from 'express'
 import Project, { IProject } from '../models/Project'
 import { RequestWithUser } from './authController'
+import User from '../models/User'
 
 // Create a new project
 export const createProject = async (req: RequestWithUser, res: Response) => {
   try {
-    const { name, description, owner } = req.body
-    const newProject: IProject = new Project({
-      name,
-      description,
-      owner,
-    })
+    const { userId } = req.user
+    const newProject: IProject = new Project({ owner: userId, ...req.body })
     await newProject.save()
+
+    // add id to user projects array
+    await User.findByIdAndUpdate(userId, {
+        $push: {
+          projects: [newProject.id]
+        }
+    })
 
     res.status(201).json({ ack: 1 })
   } catch (error) {
@@ -50,7 +54,7 @@ export const updateProject = async (req: Request, res: Response) => {
 }
 
 // Delete a project
-export const deleteProject = async (req: Request, res: Response) => {
+export const deleteProject = async (req: RequestWithUser, res: Response) => {
   try {
     const { id } = req.body
     const deletedProject: IProject | null = await Project.findByIdAndDelete(
@@ -59,6 +63,13 @@ export const deleteProject = async (req: Request, res: Response) => {
     if (!deletedProject) {
       return res.status(404).json({ ack: 0, message: 'Project not found' })
     }
+    // remove id from user projects array
+    const { userId } = req.user
+    await User.findByIdAndUpdate(userId, {
+        $pull: {
+          projects: [deletedProject.id]
+        }
+    })
     res.status(200).json({ ack: 1 })
   } catch (error) {
     res.status(500).json({ ack: 0, message: 'Project deletion failed' })

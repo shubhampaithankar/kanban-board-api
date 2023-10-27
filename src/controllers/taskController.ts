@@ -2,20 +2,20 @@ import { Request, Response } from 'express'
 import Task, { ITask } from '../models/Task'
 import { RequestWithUser } from './authController'
 import User from '../models/User'
+import Project from '../models/Project'
 
 // Create a new task
-export const createTask = async (req: Request, res: Response) => {
+export const createTask = async (req: RequestWithUser, res: Response) => {
   try {
-    const { title, description, status, labels, priority, project } = req.body
-    const newTask: ITask = new Task({
-      title,
-      description,
-      status,
-      labels,
-      priority,
-      project,
-    })
+    const { id, data } = req.body
+
+    const newTask: ITask = new Task({ project: id, ...data })
     await newTask.save()
+
+    await Project.findByIdAndUpdate(id, {
+      $push: newTask.id
+    })
+    
     res.status(201).json({ ack: 1 })
   } catch (error) {
     console.log(error.message)
@@ -65,11 +65,14 @@ export const updateTask = async (req: Request, res: Response) => {
 // Delete a task
 export const deleteTask = async (req: Request, res: Response) => {
   try {
-    const { id } = req.body
+    const { id, projectId } = req.body
     const deletedTask: ITask | null = await Task.findByIdAndDelete(id)
     if (!deletedTask) {
       return res.status(404).json({ ack: 0, message: 'Task not found' })
     }
+    await Project.findByIdAndUpdate(projectId, {
+      $pull: deletedTask.id
+    })
     res.status(200).json({ack: 1})
   } catch (error) {
     res.status(500).json({ ack: 0, message: 'Task deletion failed' })

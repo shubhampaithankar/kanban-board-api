@@ -14,6 +14,6 @@ projectRouter.get('/get', verifyToken, getAllProjects)
 projectRouter.post('/update', verifyToken, updateProject)
 
 // Delete a project (requires authentication)
-projectRouter.delete('/delete', verifyToken, deleteProject)
+projectRouter.post('/delete', verifyToken, deleteProject)
 
 export default projectRouter
