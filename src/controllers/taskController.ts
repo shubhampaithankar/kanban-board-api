@@ -13,7 +13,9 @@ export const createTask = async (req: RequestWithUser, res: Response) => {
     await newTask.save()
 
     await Project.findByIdAndUpdate(id, {
-      $push: newTask.id
+      $push: {
+        tasks: newTask.id
+      }
     })
     
     res.status(201).json({ ack: 1 })
@@ -71,7 +73,9 @@ export const deleteTask = async (req: Request, res: Response) => {
       return res.status(404).json({ ack: 0, message: 'Task not found' })
     }
     await Project.findByIdAndUpdate(projectId, {
-      $pull: deletedTask.id
+      $pull: {
+        tasks: deletedTask.id
+      }
     })
     res.status(200).json({ack: 1})
   } catch (error) {
